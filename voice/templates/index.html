@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>voice</title>
+  <script type="text/javascript" src="/static/js/audiodisplay.js"></script>
+  <script type="text/javascript" src="/static/js/recorder.js"></script>
+  <script type="text/javascript" src="/static/js/main.js"></script>
+  <script type="text/javascript">
+    function onServerResponse(result) {
+      // TODO: display relevant data
+      document.getElementById('response').innerHTML = JSON.stringify(result, 0, 4);
+    }
+  </script>
+  <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>
+  <canvas id="analyser" width="1280", height="720"></canvas>
+  <canvas id="wavedisplay" width="800" height="200"></canvas>
+	<div id="record" onmousedown="startRecording(this);" onmouseup="stopRecording(this);">Start</div>
+  <div id="play" onclick="playAudio(this);"></div>
+  <div id="submit" onclick="submitAudio(this);">✔</div>
+  <textarea id="response" placeholder="Server response will be shown here..." disabled></textarea>
+  <audio id="audio">
+</body>
+</html>
