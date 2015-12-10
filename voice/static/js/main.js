@@ -113,13 +113,12 @@ function submitAudio(button) {
       if (request.status == 200) {
         var result = JSON.parse(request.responseText);
         onServerResponse(result);
-        
-        document.getElementById('play').style.display = 'none';
-        document.getElementById('submit').style.display = 'none';
-        document.getElementById('record').style.display = 'block';
       } else {
         alert('HTTP Error: ' + request.status);
       }
+      document.getElementById('play').style.display = 'none';
+      document.getElementById('submit').style.display = 'none';
+      document.getElementById('record').style.display = 'block';
     }
   }
 
