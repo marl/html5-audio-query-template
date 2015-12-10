@@ -36,11 +36,14 @@ function saveAudio() {
   // audioRecorder.exportMonoWAV( doneEncoding );
 }
 
+var recording = false;
+
 function startRecording(button) {
+  if (recording || !audioRecorder) return;
+  recording = true;
+
   button.classList.add('recording');
   button.innerHTML = 'Stop';
-
-  if (!audioRecorder) return;
 
   // start recording
   audioRecorder.clear();
@@ -55,29 +58,47 @@ function stopRecording(button) {
   audioRecorder.stop();
   button.style.display = 'none';
 
-  console.log('getting buffers...');
   audioRecorder.getBuffers(function (buffers) {
-    console.log('got buffers');
     var canvas = document.getElementById( "wavedisplay" );
     drawBuffer( canvas.width, canvas.height, canvas.getContext('2d'), buffers[0] );
 
     // the ONLY time gotBuffers is called is right after a new recording is completed -
     // so here's where we should set up the download.
     audioRecorder.exportWAV(function (blob) {
-      console.log('done encoding!');
-      console.log(blob);
       window.blob = blob;
       var URL = window.URL || window.webkitURL || window;
 
       var play = document.getElementById('play');
       var submit = document.getElementById('submit');
+      var reset = document.getElementById('reset');
       play.style.display = 'block';
       submit.style.display = 'block';
-
+      reset.style.display = 'block';
+      recording = false;
       stopAudio(play);
+      submit.innerHTML = '✔';
       document.getElementById('audio').src = URL.createObjectURL(blob);
     });
   });
+}
+
+var lastTimeout = null;
+
+function toggleRecording(button) {
+  if (recording) {
+    if (lastTimeout) {
+      clearTimeout(lastTimeout);
+      lastTimeout = null;
+    }
+    stopRecording(button);
+  } else {
+    startRecording(button);
+    lastTimeout = setTimeout(function() {
+      if (recording) {
+        stopRecording(button);
+      }
+    }, 60000);
+  }
 }
 
 function playAudio(button) {
@@ -98,15 +119,20 @@ function stopAudio(button) {
   }
 }
 
+var submitting = false;
+
 function submitAudio(button) {
   if (!window.blob) {
     alert('Could not find the audio!');
     return;
   }
 
+  submitting = true;
   var fd = new FormData();
   fd.append('blob', window.blob);
   var request = new XMLHttpRequest();
+  button.innerHTML = '';
+  button.classList.add('sending');
 
   request.onreadystatechange = function() {
     if (request.readyState == 4) {
@@ -116,14 +142,25 @@ function submitAudio(button) {
       } else {
         alert('HTTP Error: ' + request.status);
       }
+      submitting = false;
+      button.innerHTML = '✔';
+      button.classList.remove('sending');
       document.getElementById('play').style.display = 'none';
       document.getElementById('submit').style.display = 'none';
+      document.getElementById('reset').style.display = 'none';
       document.getElementById('record').style.display = 'block';
     }
   }
 
   request.open('POST', '/submit');
   request.send(fd);
+}
+
+function resetAudio(button) {
+  document.getElementById('play').style.display = 'none';
+  document.getElementById('submit').style.display = 'none';
+  document.getElementById('reset').style.display = 'none';
+  document.getElementById('record').style.display = 'block';
 }
 
 function convertToMono( input ) {

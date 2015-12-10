@@ -1,5 +1,5 @@
 from voice import app
-from flask import request, render_template
+from flask import request, render_template, jsonify
 import ujson
 import tempfile
 import shutil
@@ -23,6 +23,6 @@ def submit():
     shutil.rmtree(dirpath)
 
     # TODO: return the result
-    return ujson.dumps({
+    return jsonify({
         'size': size
     });
